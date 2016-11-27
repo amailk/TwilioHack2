@@ -21,18 +21,28 @@ from twilio import twiml
 account_sid = "ACa6d65bfcb4ea7272014bb7ff9e5a7c8d"
 auth_token  = "95f29e1c04ee7e398003eba871e928a7"
 twilio_number = "+16474964327"
-client = TwilioRestClient(account_sid, auth_token)
+
+base = "http://twiliohack2.appspot.com"
+
+GREETING = ''' "Hello. Please listen closely for the options. If you are calling because you have a question, please press 1. If you would like to register for our service, please press 2. If you would like to learn more about our service, please press 3.'''
 
 class WelcomeHandler(webapp2.RequestHandler):
+
+
     def get(self):
         r = twiml.Response()
-        with r.gather(ation=base+"/choice", numDigits=1) as g:
-            g.say("Enter 1 or 2 or 3")
+        with r.gather(action=base+"/choice", numDigits=1) as g:
+            g.say(GREETING)
 
-class ChoiceHandler(webapp2.ChoiceHandler):
-    def get(self):
+        self.response.write(r)
+
+class ChoiceHandler(webapp2.RequestHandler):
+    def post(self):
         choice = self.request.get("Digits")
-        print choice
+
+        r = twiml.Response()
+        r.say("You have entered, " + choice)
+        self.response.write(r)
 
 app = webapp2.WSGIApplication([
     ('/welcome', WelcomeHandler),
