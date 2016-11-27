@@ -27,8 +27,6 @@ base = "http://twiliohack2.appspot.com"
 GREETING = ''' "Hello. Please listen closely for the options. If you are calling because you have a question, please press 1. If you would like to register for our service, please press 2. If you would like to learn more about our service, please press 3.'''
 
 class WelcomeHandler(webapp2.RequestHandler):
-
-
     def get(self):
         r = twiml.Response()
         with r.gather(action=base+"/choice", numDigits=1) as g:
@@ -41,10 +39,39 @@ class ChoiceHandler(webapp2.RequestHandler):
         choice = self.request.get("Digits")
 
         r = twiml.Response()
+        r.pause(length=2)
         r.say("You have entered, " + choice)
+        r.pause(length=2)
+        r.redirect("register_name")
+        self.response.write(r)
+
+class RegNameHandler(webapp2.RequestHandler):
+    def post(self):
+        r = twiml.Response()
+        r.pause(length=2)
+        r.say("What is your name?")
+        r.pause(length=2)
+        r.record(transcribe="true", transcribeCallback=base+"/name_callback", action=base+"/register_dob")
+
+        self.response.write(r)
+
+class NameCallback(webapp2.RequestHandler):
+    def post(self):
+        pass
+
+class RegDobHandler(webapp2.RequestHandler):
+    def post(self):
+        r = twiml.Response()
+        r.pause(length=2)
+        r.say("What is your date of birth? Please state in order: year, month, and then date")
+        r.pause(length=2)
+
         self.response.write(r)
 
 app = webapp2.WSGIApplication([
     ('/welcome', WelcomeHandler),
     ('/choice', ChoiceHandler),
+    ('/register_name', RegNameHandler),
+    ('/name_callback', NameCallback),
+    ('/register_dob', RegDobHandler),
 ], debug=True)
